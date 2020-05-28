@@ -1,30 +1,34 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 import { Section } from '../Utils/Utils';
+import ProjectApiService from '../../services/project-api-service';
+import ProjectItem from '../ProjectItem/ProjectItem';
 
 export default class FeedPage extends Component {
+  state = {
+    vacantProjects: []
+  }
 
-  //  ProjectApiService.getVacancies()
-  //     .then(this.context.setVacancies)
-  //     .catch(this.context.setError)
+  componentDidMount() {
+    ProjectApiService.getAllProjects()
+      .then(vacantProjects => this.setState({vacantProjects}))
+  }
+  
 
-  render() {
-    // const vacancies = this.context.vacancies;
-
+  render() {    
     return (
-      <Section className="vacancy">
-        <h1>All Projects With Vacancies</h1>
-        <ul className="vacanciesList">
-        {/* {
-          vacancies.map(vacancy => {
-            <li>{vacancy}</li>
-          })
-        } */}
-        <li className="clickable">Test Vacancy1</li>
-        <li className="clickable">Test Vacancy1</li>
-        <li className="clickable">Test Vacancy1</li>
-        <li className="clickable">Test Vacancy1</li>
-        </ul>
-      </Section>
+      <Section className="projects-page">      
+      <h2>Projects with vacancies</h2> 
+      {
+         (this.state.vacantProjects.length !== 0)? 
+         <div>{this.state.vacantProjects.map((project, i) => {
+            return (<ProjectItem key={i} project={project}/>)
+         })}
+         </div>
+          : 'No projects available!'
+         }         
+      
+    </Section>
     )
   }
 }
