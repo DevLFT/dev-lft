@@ -12,7 +12,7 @@ export default class ProjectForm extends Component {
     const tags = e.target.tags.value.split(', ');
     ProjectApiService.postProject(name.value, description.value, tags, live_url.value, trello_url.value, github_url.value)
       .then(() => {
-        this.props.history.push(`/projects`)
+        this.props.history.push(`/my-projects`)
       })
       .catch(error => {
         console.log(error);
