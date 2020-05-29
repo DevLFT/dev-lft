@@ -52,7 +52,7 @@ class Signup extends React.Component {
             <input type="password" id="pwd" name="password" required />
             <br />
             <button type="submit" className="signupbtn">
-              SIGN IN
+              SIGN UP
             </button>
             <br />
             <label htmlFor="member">Already a member?</label>
