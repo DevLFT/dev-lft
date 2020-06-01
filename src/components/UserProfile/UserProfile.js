@@ -21,10 +21,9 @@ export default class UserProfile extends Component {
   }
   render() {
     let userInfo = this.state.userInfo;
-    console.log(userInfo.date_created);
     return (
       <Section>
-        {userInfo.user_id === TokenService.parseAuthToken().user_id ? (
+        {userInfo.id === TokenService.parseAuthToken().user_id ? (
           <Redirect to="/settings" />
         ) : (
           <div>
