@@ -23,13 +23,23 @@ export default class FeedItem extends Component {
         </div>
         <p>
           <span className="bold">GitHub url:</span>
-          {project.github_url}
+          <Link
+            href={project.live_url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {project.github_url}
+          </Link>
         </p>
         <p>
           <span className="bold">Live url:</span>
-          <a href={project.live_url} target="_blank" rel="noopener noreferrer">
+          <Link
+            href={project.live_url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             {project.live_url}
-          </a>
+          </Link>
         </p>
         <p>
           <span className="bold">Trello url</span>
