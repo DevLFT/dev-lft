@@ -43,7 +43,13 @@ export default class FeedItem extends Component {
         </p>
         <p>
           <span className="bold">Trello url</span>
-          {project.trello_url}
+          <Link
+            href={project.live_url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {project.trello_url}
+          </Link>
         </p>
         <Link to={`/project-dash/${project.id}`}>Go to dashboard</Link>
       </div>
