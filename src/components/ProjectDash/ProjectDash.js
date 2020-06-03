@@ -3,8 +3,15 @@ import ProjectDashService from './project-dash-service';
 import './ProjectDash.css';
 import TokenService from '../../services/token-service';
 import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
 class ProjectDash extends Component {
+  static defaultProps = {
+    history: {
+      push: () => {}
+    }
+  };
+
   state = {
     user_role: '',
     project: {},
@@ -16,11 +23,9 @@ class ProjectDash extends Component {
 
   componentDidMount() {
     let project_id = this.props.match.params.project_id;
-    let userInfo = TokenService.parseAuthToken();
 
     this.setState({
-      project_id,
-      user_id: userInfo.user_id
+      project_id
     });
 
     ProjectDashService.getProjects(project_id)
@@ -60,10 +65,9 @@ class ProjectDash extends Component {
   }
 
   determineUserRole = () => {
-    let { user_id, project, vacancies } = this.state;
-    let isMember = vacancies.find(item => item.user_id == user_id);
-
-    if (project.creator == user_id) {
+    let { project, vacancies } = this.state;
+    let isMember = vacancies.find(item => item.request_status == 'approved');
+    if (project.isOwner) {
       this.setState({
         user_role: 'owner'
       });
@@ -186,11 +190,11 @@ class ProjectDash extends Component {
     ) {
       return;
     }
-    let { vacancies, user_id, project_id } = this.state;
-    let vacancy = vacancies.find(item => item.user_id === user_id);
+    let { vacancies, project_id } = this.state;
+    let vacancy = vacancies.find(item => item.request_status === 'approved');
     let vacancy_id = vacancy.id;
-    //user_id changes to null
-    user_id = null;
+    //set user_id to null to update server
+    let user_id = null;
     ProjectDashService.patchVacancy(vacancy_id, user_id)
       .then(() => {
         ProjectDashService.getVacancies(project_id).then(vacancies => {
@@ -205,15 +209,26 @@ class ProjectDash extends Component {
       });
   };
 
-  //need to add some sort of user feedback
   handleRequest = e => {
     e.preventDefault();
-    let { project_id } = this.state;
     let vacancy_id = e.target.value;
+    let { project_id, requests } = this.state;
 
-    ProjectDashService.postRequest(project_id, vacancy_id).catch(res => {
-      alert(res.error);
-    });
+    ProjectDashService.postRequest(vacancy_id)
+      .then(res => {
+        requests.push(res);
+        ProjectDashService.getVacancies(project_id).then(vacancies => {
+          this.setState({
+            requests,
+            vacancies
+          });
+        });
+      })
+      .catch(res => {
+        this.setState({
+          error: res.error
+        });
+      });
   };
 
   handleSubmitPost = e => {
@@ -395,28 +410,27 @@ class ProjectDash extends Component {
     if (!vacancies) {
       return <p>No vacancies at this time</p>;
     }
+    let userRequests = vacancies.filter(item => item.request_status !== null);
 
     let vacancyList = vacancies.map(item => {
+      let userRequest = userRequests.find(req => req.id == item.id) || null;
       return (
         <li key={item.id}>
-          <p>{item.user_id === null ? 'This role is available' : ''}</p>
           <h3>
-            {item.user_id !== null ? (
-              <Link to={`/users/${item.user_id}`}>
+            {item.username !== null ? (
+              <Link to={`/users/${item.username}`}>
                 <span>
                   {item.first_name} {item.last_name}
                 </span>
               </Link>
             ) : (
-              <span>
-                {item.first_name} {item.last_name}
-              </span>
+              <span>This role is available</span>
             )}
           </h3>
           <p>Role: {item.title}</p>
           <p>Duties: {item.description}</p>
           <p>Skills: {item.skills.join(', ')}</p>
-          {user_role === 'owner' && item.user_id !== null ? (
+          {user_role === 'owner' && item.username !== null ? (
             <button
               value={item.id}
               onClick={this.handleRemoveMember}
@@ -427,7 +441,7 @@ class ProjectDash extends Component {
           ) : (
             ''
           )}
-          {user_role === 'owner' && item.user_id === null ? (
+          {user_role === 'owner' && item.username === null ? (
             <button
               value={item.id}
               onClick={this.handleDeleteVacancy}
@@ -438,7 +452,14 @@ class ProjectDash extends Component {
           ) : (
             ''
           )}
-          {user_role === 'user' && item.user_id === null ? (
+
+          {user_role === 'user' && userRequest ? (
+            <p>Request {userRequest.request_status}</p>
+          ) : (
+            ''
+          )}
+
+          {user_role === 'user' && item.username === null && !userRequest ? (
             <button type="button" value={item.id} onClick={this.handleRequest}>
               Request to join
             </button>
@@ -452,7 +473,7 @@ class ProjectDash extends Component {
   };
 
   renderPosts = () => {
-    let { posts, user_id, postToEdit } = this.state;
+    let { posts, postToEdit } = this.state;
     if (!posts) {
       return <p>No posts at this time</p>;
     }
@@ -463,14 +484,14 @@ class ProjectDash extends Component {
           <p>
             {post.first_name} {post.last_name}: {post.message}
           </p>
-          {post.user_id === user_id ? (
+          {post.canEdit ? (
             <button value={post.id} onClick={this.handleEditPost} type="button">
               edit
             </button>
           ) : (
             ''
           )}
-          {post.user_id === user_id && postToEdit == post.id ? (
+          {post.canEdit && postToEdit == post.id ? (
             <form
               name="edit-post-form"
               className="edit-post-form"
@@ -494,14 +515,15 @@ class ProjectDash extends Component {
 
   renderRequests = () => {
     let { requests } = this.state;
+    let pendingRequests = requests.filter(item => item.status === 'pending');
     if (!requests) {
       return <p>No requests at this time</p>;
     }
 
-    let requestList = requests.map(request => {
+    let requestList = pendingRequests.map(request => {
       return (
         <li key={request.id}>
-          <Link to={`/users/${request.user_id}`}>
+          <Link to={`/users/${request.username}`}>
             {request.first_name} {request.last_name}
           </Link>
           wants to fill your {request.vacancy_title} role
@@ -613,5 +635,16 @@ class ProjectDash extends Component {
     );
   }
 }
+
+ProjectDash.propTypes = {
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      folder_id: PropTypes.number
+    })
+  }),
+  history: PropTypes.shape({
+    push: PropTypes.func
+  })
+};
 
 export default ProjectDash;

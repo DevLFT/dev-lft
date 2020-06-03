@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
-import config from '../../config';
+import ChatService from '../../services/chat-service';
 import './ChatMessageForm.css';
+import PropTypes from 'prop-types';
 
 class ChatMessageForm extends Component {
   static defaultProps = {
     recipient_id: null,
-    project_id: null
+    project_id: null,
+    setNewMessage: () => {}
   };
 
   state = {
@@ -28,19 +30,13 @@ class ChatMessageForm extends Component {
       recipient_id,
       project_id
     };
-
-    fetch(`${config.API_ENDPOINT}/chats`, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        Authorization: `Bearer ${window.localStorage.getItem(config.TOKEN_KEY)}`
-      },
-      body: JSON.stringify(newMessage)
-    })
-      .then(res => res.json())
+    ChatService.postChatMessage(newMessage)
       .then(res => {
         this.setState({ error: null, body: '' });
-        return this.props.setNewMessage(res.resultingMessage);
+        return this.props.setNewMessage({
+          ...res.resultingMessage,
+          isAuthor: true
+        });
       })
       .catch(error => this.setState({ error }));
   };
@@ -49,7 +45,7 @@ class ChatMessageForm extends Component {
     const { error } = this.state;
     return (
       <form className="ChatMessageForm" onSubmit={e => this.onSend(e)}>
-        <div role="alert">{error && <p>{error}</p>}</div>
+        <div role="alert">{error && <p>{error.error}</p>}</div>
         <label htmlFor="body">Reply:</label>
         <input
           type="text"
@@ -64,4 +60,11 @@ class ChatMessageForm extends Component {
     );
   }
 }
+
+ChatMessageForm.propType = {
+  recipient_id: PropTypes.number.isRequired,
+  project_id: PropTypes.number.isRequired,
+  setNewMessage: PropTypes.func.isRequired
+};
+
 export default ChatMessageForm;

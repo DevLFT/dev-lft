@@ -16,10 +16,57 @@ import ChatMessages from './components/ChatMessages/ChatMessages';
 import Settings from './components/Settings/Settings';
 import ProjectDash from './components/ProjectDash/ProjectDash';
 
+import UserContext from './contexts/UserContext';
+import TokenService from './services/token-service';
+import AuthApiService from './services/auth-api-service';
+
 export default class App extends Component {
+  state = {
+    user: {
+      username: '',
+      first_name: '',
+      last_name: '',
+      github_url: '',
+      linkedin_url: '',
+      twitter_url: '',
+      date_created: '',
+      isAuth: TokenService.hasAuthToken()
+    },
+    error: null
+  };
+
+  componentDidMount() {
+    if (TokenService.hasAuthToken()) {
+      this.handleAuth();
+    }
+  }
+
+  handleAuth = () => {
+    AuthApiService.getUserProfile()
+      .then(user => this.setState({ user: { ...user, isAuth: true } }))
+      .catch(error => this.setState({ ...error, user: { isAuth: false } }));
+  };
+
+  handleLogOut = () => {
+    TokenService.clearAuthToken();
+    this.handleAuth();
+  };
+
+  handleUserUpdate = updatedFields => {
+    this.setState({ user: { ...this.state.user, ...updatedFields } });
+  };
+
   render() {
+    const { user } = this.state;
+    const contextValues = {
+      user,
+      onAuth: this.handleAuth,
+      onLogOut: this.handleLogOut,
+      onProfileUpdate: this.handleUserUpdate
+    };
+
     return (
-      <React.Fragment>
+      <UserContext.Provider value={contextValues}>
         <Nav />
         <Switch>
           <Route exact path="/" component={LandingPage} />
@@ -30,12 +77,12 @@ export default class App extends Component {
           <Route path="/my-projects" component={ProjectsPage} />
           <Route path="/project-form" component={ProjectForm} />
           <Route path="/project-dash/:project_id" component={ProjectDash} />
-          <Route path="/users/:user_id" component={UserProfile} />
+          <Route path="/users/:username" component={UserProfile} />
           <Route exact path="/chats" component={Chat} />
           <Route path="/chats/messages" component={ChatMessages} />
         </Switch>
         <Footer />
-      </React.Fragment>
+      </UserContext.Provider>
     );
   }
 }
