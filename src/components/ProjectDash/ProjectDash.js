@@ -3,6 +3,7 @@ import ProjectDashService from './project-dash-service';
 import Info from './Info';
 import Posts from './Posts';
 import Vacancies from './Vacancies';
+import OpenVacancies from './OpenVacancies';
 import VacancyModal from './VacancyModal';
 import ChatModal from './ChatModal';
 import Requests from './Requests';
@@ -297,6 +298,12 @@ class ProjectDash extends Component {
         ) : (
           ''
         )}
+        <OpenVacancies
+          handleRequest={this.handleRequest}
+          project_id={this.state.project_id}
+          userRole={userRole}
+          vacancies={this.state.vacancies}
+        />
       </section>
     );
   }
