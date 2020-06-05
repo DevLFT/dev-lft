@@ -11,11 +11,15 @@ export default class Footer extends Component {
       <footer>
         <div className="wrapper">
           <div className="footer-left">
+<<<<<<< HEAD
             <h2>
               <Link to="/">
                 <Logo />
               </Link>
             </h2>
+=======
+            <Link to="/" className="logo"><Logo /></Link>
+>>>>>>> 8df0ff540a370192bf708a4e45b6e94546f1584d
             <p>All rights reserved.</p>
           </div>
 
