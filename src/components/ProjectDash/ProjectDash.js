@@ -233,9 +233,20 @@ class ProjectDash extends Component {
       <section className="ProjectDash">
         <div role="alert">{error && <p>{error}</p>}</div>
         <h1>Project Dashboard</h1>
+      <h2>{project.name}
+</h2>
+        {userRole === 'member' || userRole === 'owner' ? (
+          /*  Passing the whole project so that the ProjectLinks can render.
+              TODO: Find out if these are going to move into this component.
+              Looks like it was done for the current layout where it's between
+              Posts and Project Links.
+          */
+          <Posts project_id={this.state.project_id} project={project} />
+        ) : (
+          ''
+        )}
         <article className="project">
           <Info
-            name={project.name}
             description={project.description}
             tags={project.tags}
           />
@@ -250,17 +261,6 @@ class ProjectDash extends Component {
             />
           )}
         </article>
-
-        {userRole === 'member' || userRole === 'owner' ? (
-          /*  Passing the whole project so that the ProjectLinks can render.
-              TODO: Find out if these are going to move into this component.
-              Looks like it was done for the current layout where it's between
-              Posts and Project Links.
-          */
-          <Posts project_id={this.state.project_id} project={project} />
-        ) : (
-          ''
-        )}
 
         {userRole === 'member' ? (
           <button onClick={this.handleLeaveTeam} type="button">

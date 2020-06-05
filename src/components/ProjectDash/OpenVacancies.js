@@ -10,26 +10,25 @@ class OpenVacancies extends Component {
   };
 
   renderOpenVacancies = () => {
-    let allVacancies = this.props.vacancies
-    let openVacancies = allVacancies.filter(item => item.username === null)
+    let allVacancies = this.props.vacancies;
+    let openVacancies = allVacancies.filter(item => item.username === null);
 
     return openVacancies.map(item => {
-      return <li className="open-vacancies-item" key={item.id}> 
-      <h4>{item.title}</h4>
-      <p>{item.description}</p>
-      <ul className="vacancy-skills">{this.renderSkills(item.skills)}</ul>
-      </li>
-    })
+      return (
+        <li className="open-vacancies-item" key={item.id}>
+          <h4>{item.title}</h4>
+          <p>{item.description}</p>
+          <ul className="vacancy-skills">{this.renderSkills(item.skills)}</ul>
+        </li>
+      );
+    });
   };
 
   renderSkills = skills => {
     return skills.map(element => {
-      return <li key={element}>
-      {element}
-      </li>
+      return <li key={element}>{element}</li>;
     });
-
-  }
+  };
 
   render() {
     return (
