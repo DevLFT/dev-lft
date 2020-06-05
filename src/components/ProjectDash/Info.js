@@ -14,6 +14,7 @@ const Info = ({description = '', tags = [] }) => {
 
   return (
     <>
+    <h3>Project Info</h3>
       <p>{description}</p>
       <ul className="tags">{renderTags(tags)}</ul>
     </>

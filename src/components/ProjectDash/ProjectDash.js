@@ -245,22 +245,7 @@ class ProjectDash extends Component {
         ) : (
           ''
         )}
-        <article className="project">
-          <Info
-            description={project.description}
-            tags={project.tags}
-          />
-          {this.state.project_id && (
-            <Vacancies
-              project_id={this.state.project_id}
-              userRole={userRole}
-              vacancies={this.state.vacancies}
-              requests={this.state.requests}
-              setVacancies={this.setVacancies}
-              setRequests={this.setRequests}
-            />
-          )}
-        </article>
+        
 
         {userRole === 'member' ? (
           <button onClick={this.handleLeaveTeam} type="button">
@@ -298,12 +283,28 @@ class ProjectDash extends Component {
         ) : (
           ''
         )}
+        {this.state.project_id && (
+            <Vacancies
+              project_id={this.state.project_id}
+              userRole={userRole}
+              vacancies={this.state.vacancies}
+              requests={this.state.requests}
+              setVacancies={this.setVacancies}
+              setRequests={this.setRequests}
+            />
+          )}
         <OpenVacancies
           handleRequest={this.handleRequest}
           project_id={this.state.project_id}
           userRole={userRole}
           vacancies={this.state.vacancies}
         />
+        <article className="project">
+          <Info
+            description={project.description}
+            tags={project.tags}
+          />
+        </article>
       </section>
     );
   }
