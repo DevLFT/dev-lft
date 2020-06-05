@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-import ProjectDashService from './project-dash-service';
-import ProjectLinks from './ProjectLinks';
 
 class OpenVacancies extends Component {
   static defaultProps = {
