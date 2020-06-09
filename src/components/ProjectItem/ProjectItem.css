@@ -1,0 +1,96 @@
+.project {
+  font-weight: 500;
+  height: 100%;
+  font-size: 1.3rem;
+  margin-bottom: 2rem;
+}
+
+.project h3 {
+  color: var(--colorAccent);
+  margin-bottom: 1rem;
+}
+
+.project .description {
+  line-height: 1.2;
+  color: var(--colorMidFG);
+}
+
+.project .info-item {
+  margin-bottom: 0.7rem;
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  color: var(--colorMidFG);
+}
+
+@media screen and (min-width: 680px) {
+  .project {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .project .project-left {
+    flex: 3;
+  }
+
+  .project .project-right {
+    flex: 2;
+    height: 100%;
+    margin-left: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .project .info-item {
+    justify-content: flex-end;
+  }
+}
+
+.project .info-item svg {
+  fill: var(--colorFG);
+  height: 1.3em;
+  width: 1.3em;
+  margin-right: 0.7em;
+}
+
+.project .info-item p {
+  width: 8em;
+}
+
+/* making this globally accessible, might move to own component */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  user-select: none;
+  margin: 1rem 0;
+}
+
+.tags .tag {
+  display: inline-flex;
+  align-items: center;
+  height: 1.5rem;
+  text-transform: uppercase;
+  font-size: 1rem;
+  font-weight: 700;
+  background: var(--colorAccent);
+  color: var(--colorBG);
+  white-space: nowrap;
+  padding: 0 0.3rem;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+@media screen and (min-width: 680px) {
+  .tags {
+    justify-content: flex-end;
+  }
+
+  .tags .tag {
+    margin-right: 0;
+    margin-left: 0.5rem;
+  }
+}

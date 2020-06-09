@@ -1,47 +1,87 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import './ProjectItem.css';
+import {
+  differenceInDays,
+  differenceInWeeks,
+  differenceInMonths,
+  differenceInYears
+} from 'date-fns';
 import PropTypes from 'prop-types';
+import './ProjectItem.css';
+
+// images
+import { CalendarIcon, VacanciesIcon } from '../../images';
 
 export default class ProjectItem extends Component {
+  formatProjectDate = date => {
+    const projectDate = new Date(date);
+    const currentDate = new Date();
+    const diffInDays = differenceInDays(currentDate, projectDate);
+    let output = null,
+      interval = 'day',
+      number = 0;
+
+    if (diffInDays === 0) {
+      output = 'Today';
+    } else if (diffInDays === 1) {
+      output = 'Yesterday';
+    } else if (diffInDays < 7) {
+      interval = 'day';
+      number = diffInDays;
+    } else if (diffInDays < 30) {
+      interval = 'week';
+      number = differenceInWeeks(currentDate, projectDate);
+    } else if (diffInDays < 365) {
+      interval = 'month';
+      number = differenceInMonths(currentDate, projectDate);
+    } else {
+      interval = 'year';
+      number = differenceInYears(currentDate, projectDate);
+    }
+
+    if (output === null) {
+      return `${number} ${interval}${number !== 1 ? 's' : ''} ago`;
+    } else {
+      return output;
+    }
+  };
+
   render() {
-    let project = this.props.project;
+    const {
+      project: { id, name, description, tags, date_created, openVacancies = 1 }
+    } = this.props;
     return (
-      <div className="oneProject">
-        <h3>
-          <span className="bold">Name:</span>
-          {project.name}
-        </h3>
-        <p>
-          <span className="bold">Description:</span>
-          {project.description}
-        </p>
-        <div>
-          <span className="bold">Tags</span>
-          {project.tags.map((tag, i) => {
-            return <span key={i}> | {tag}</span>;
-          })}
+      <article className="project card">
+        <div className="project-left">
+          <h3>
+            <Link to={`/projects/${id}`}>{name}</Link>
+          </h3>
+          <p className="description">{description}</p>
         </div>
-        <p>
-          <span className="bold">GitHub url:</span>
-          <a href={project.live_url} target="_blank" rel="noopener noreferrer">
-            {project.github_url}
-          </a>
-        </p>
-        <p>
-          <span className="bold">Live url:</span>
-          <a href={project.live_url} target="_blank" rel="noopener noreferrer">
-            {project.live_url}
-          </a>
-        </p>
-        <p>
-          <span className="bold">Trello url</span>
-          <a href={project.live_url} target="_blank" rel="noopener noreferrer">
-            {project.trello_url}
-          </a>
-        </p>
-        <Link to={`/project-dash/${project.id}`}>Go to dashboard</Link>
-      </div>
+        <div className="project-right">
+          <p className="tags">
+            {tags.map((tag, i) => {
+              return (
+                <span key={i} className="tag">
+                  {tag}
+                </span>
+              );
+            })}
+          </p>
+          <div>
+            <div className="info-item">
+              <CalendarIcon />
+              <p>{this.formatProjectDate(date_created)}</p>
+            </div>
+            <div className="info-item">
+              <VacanciesIcon />
+              <p>
+                {openVacancies} open position{+openVacancies !== 1 ? 's' : ''}
+              </p>
+            </div>
+          </div>
+        </div>
+      </article>
     );
   }
 }
