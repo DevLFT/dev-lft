@@ -5,6 +5,10 @@ import ProjectApiService from '../../services/project-api-service';
 import './ProjectForm.css';
 
 export default class ProjectForm extends Component {
+  state = {
+    error: null
+  }
+
   handleSubmit = e => {
     e.preventDefault();
     const { project_name, description, live_url, trello_url, github_url } = e.target;
@@ -20,8 +24,8 @@ export default class ProjectForm extends Component {
       .then(() => {
         this.props.onCreate();
       })
-      .catch(error => {
-        console.log(error);
+      .catch(res => {
+        this.setState({ error: res.error || 'Something went wrong. Please try again later' })
       });
   };
 
@@ -33,13 +37,13 @@ export default class ProjectForm extends Component {
             <div className="input-group name-input">
               <div className="input">
                 <label htmlFor="project_name">Project Name *</label>
-                <input autoFocus={true} placeholder="New Project" type="text" name="project_name" id="project_name" required />
+                <input autoFocus={true} placeholder="New Project" minLength="2" maxLength="30" type="text" name="project_name" id="project_name" required />
               </div>
             </div>
             <div className="input-group">
               <div className="input">
                 <label htmlFor="description">Project Description *</label>
-                <textarea rows="8" name="description" id="description" required placeholder="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."></textarea>
+                <textarea rows="8" name="description" id="description" required minLength="10" maxLength="255" placeholder="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."></textarea>
               </div>
             </div>
           </div>
@@ -70,6 +74,11 @@ export default class ProjectForm extends Component {
             </div>
           </div>
         </div>
+
+        {this.state.error
+          ? <p role="alert" className="project error">{this.state.error}</p>
+          : ''}
+
         <Button type="submit">Create Project</Button>
         <Button className="clear" onClick={this.props.onCancel}>Cancel</Button>
       </form>

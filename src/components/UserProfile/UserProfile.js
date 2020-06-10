@@ -2,7 +2,10 @@ import React, { Component } from 'react';
 import { Helmet } from 'react-helmet';
 import PropTypes from 'prop-types';
 import { format } from 'date-fns';
+import { Link } from 'react-router-dom';
+import Button from '../Button/Button';
 import AuthApiService from '../../services/auth-api-service';
+import UserContext from '../../contexts/UserContext';
 import './UserProfile.css';
 
 export default class UserProfile extends Component {
@@ -11,14 +14,21 @@ export default class UserProfile extends Component {
     error: null
   };
 
+  static contextType = UserContext;
+
   componentDidMount() {
     this.setState({ loading: true });
     let username = this.props.match.params.username;
+    this.context.startLoading();
     AuthApiService.getUserInfo(username)
       .then(userInfo => {
         this.setState({ user: { ...userInfo } });
+        this.context.stopLoading();
       })
-      .catch(res => this.setState({ error: res.error || res.message }));
+      .catch(res => {
+        this.setState({ error: res.error || 'Something went wrong. Please try again' });
+        this.context.stopLoading();
+      });
   }
 
   getDate = date => {
@@ -41,6 +51,8 @@ export default class UserProfile extends Component {
       },
       error
     } = this.state;
+
+    const loggedInUsername = this.context.user.username;
 
     const title = first_name ? `${first_name} ${last_name}` : 'User Profile';
     return (
@@ -66,9 +78,18 @@ export default class UserProfile extends Component {
               )
               : ''}
 
+            {loggedInUsername === username
+              ? <div className="card info">
+                <p>This is what your profile looks to others.</p>
+                <Link to="/account">
+                  <Button isLink={true} className="clear">Edit profile</Button>
+                </Link>
+              </div>
+              : ''}
+
             <div className="grid">
               <div className="column column-1-2">
-                <article className="card">
+                <article className="card bio">
                   <h3 className="title">Bio</h3>
                   <p className="project">{bio || 'An awesome DevLFT user.'}</p>
                   <p>

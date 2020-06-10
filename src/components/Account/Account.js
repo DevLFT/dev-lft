@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Helmet } from 'react-helmet';
+import { Link } from 'react-router-dom';
 import Button from '../Button/Button';
 import AuthApiService from '../../services/auth-api-service';
 import UserContext from '../../contexts/UserContext';
@@ -51,12 +52,17 @@ export default class Account extends Component {
       skills: skills.value.split(', ').filter(Boolean)
     };
 
+    this.context.startLoading();
     AuthApiService.updateUserInfo(updatedInfo)
       .then(() => {
         this.setState({ updateSuccess: true, formDirty: false });
         this.context.onProfileUpdate(updatedInfo);
+        this.context.stopLoading();
       })
-      .catch(error => error.error);
+      .catch(res => {
+        this.setState({ error: res.error || 'Something went wrong. Please try again later' });
+        this.context.stopLoading();
+      });
   };
 
   dismissSuccessMsg = () => {
@@ -67,18 +73,51 @@ export default class Account extends Component {
     this.setState({ formDirty: true });
   }
 
+  handleNotificationChange = e => {
+    const { value, checked } = e.target;
+    let notifications = [...this.context.user.notifications];
+    const newNotificationSettings = !checked
+      ? notifications.filter(n => n !== value)
+      : [...notifications, value];
+
+    this.context.setNotifications(newNotificationSettings);
+  }
+
+  renderNotifications = () => {
+    const { user: { notifications = [] } } = this.context;
+    const notificationTypes = [
+      { type: 'chat', description: 'New chat messages' },
+      { type: 'join', description: 'People joining your teams' },
+      { type: 'leave', description: 'People leaving your teams' },
+      { type: 'post', description: 'New posts to your teams\' discussion boards' }
+    ]
+
+    return notificationTypes.map(({ type, description }, i) => (
+      <label className="check" key={i}>
+        <input
+          name="notifications"
+          checked={notifications.includes(type)}
+          onChange={this.handleNotificationChange}
+          value={type}
+          type="checkbox" />
+        <span>{description}</span>
+      </label>
+    ));
+  }
+
   render() {
     const {
-      first_name,
-      last_name,
-      github_url,
-      linkedin_url,
-      twitter_url,
-      username,
-      notifications = {},
-      bio,
-      skills = []
-    } = this.context.user;
+      user: {
+        first_name,
+        last_name,
+        github_url,
+        linkedin_url,
+        twitter_url,
+        username,
+        bio,
+        skills = []
+      }
+    } = this.context;
 
     const { formDirty, error } = this.state;
 
@@ -113,38 +152,33 @@ export default class Account extends Component {
                   <div className="input-group">
                     <div className="input">
                       <label htmlFor="first_name">First name *</label>
-                      <input id="first_name" type="text" name="first_name" required placeholder="John" defaultValue={first_name} />
+                      <input id="first_name" type="text" name="first_name" minLength="2" maxLength="30" required placeholder="John" defaultValue={first_name} />
                     </div>
                     <div className="input">
                       <label htmlFor="last_name">Last name *</label>
-                      <input id="last_name" type="text" name="last_name" required placeholder="Doe" defaultValue={last_name} />
+                      <input id="last_name" type="text" name="last_name" minLength="2" maxLength="30" required placeholder="Doe" defaultValue={last_name} />
                     </div>
                   </div>
                   <div className="input-group">
                     <div className="input">
                       <label htmlFor="github_url">GitHub URL</label>
-                      <input id="github_url" type="url" name="github_url" placeholder="https://github.com/johndoe" defaultValue={github_url} />
+                      <input id="github_url" type="url" name="github_url" maxLength="255" placeholder="https://github.com/johndoe" defaultValue={github_url} />
                     </div>
                   </div>
                   <div className="input-group">
                     <div className="input">
                       <label htmlFor="linkedin_url">Linkedin URL</label>
-                      <input id="linkedin_url" type="url" name="linkedin_url" placeholder="https://linkedin.com/in/johndoe" defaultValue={linkedin_url} />
+                      <input id="linkedin_url" type="url" name="linkedin_url" maxLength="255" placeholder="https://linkedin.com/in/johndoe" defaultValue={linkedin_url} />
                     </div>
                   </div>
                   <div className="input-group">
                     <div className="input">
                       <label htmlFor="twitter_url">Twitter URL</label>
-                      <input id="twitter_url" type="url" name="twitter_url" placeholder="https://twitter.com/johndoe" defaultValue={twitter_url} />
+                      <input id="twitter_url" type="url" name="twitter_url" maxLength="255" placeholder="https://twitter.com/johndoe" defaultValue={twitter_url} />
                     </div>
                   </div>
                   <hr />
-                  <div className="input-group">
-                    <div className="input">
-                      <label htmlFor="username">Username</label>
-                      <input title="Changing username is not currently supported" id="username" type="text" name="username" placeholder="johndoe" defaultValue={username} readOnly={true} />
-                    </div>
-                  </div>
+                  <Link to={`/users/${username}`} className="profile-link">View profile</Link>
                 </article>
 
                 <article className="card">
@@ -156,18 +190,7 @@ export default class Account extends Component {
                   </div>
                   <div className="input-group">
                     <div className="input">
-                      <label className="check"><input name="notifications" defaultChecked={!!notifications.chat} value="chat" type="checkbox" />
-                        <span>New chat messages</span>
-                      </label>
-                      <label className="check"><input name="notifications" defaultChecked={!!notifications.join} value="join" type="checkbox" />
-                        <span>People joining your teams</span>
-                      </label>
-                      <label className="check"><input name="notifications" defaultChecked={!!notifications.leave} value="leave" type="checkbox" />
-                        <span>People leaving your teams</span>
-                      </label>
-                      <label className="check"><input name="notifications" defaultChecked={!!notifications.post} value="post" type="checkbox" />
-                        <span>New posts to your teams' discussion boards</span>
-                      </label>
+                      {this.renderNotifications()}
                     </div>
                   </div>
                 </article>
@@ -176,12 +199,12 @@ export default class Account extends Component {
               <div className="column column-1-2">
                 <article className="card">
                   <h3 className="title">Bio</h3>
-                  <textarea rows="6" name="bio" id="bio" defaultValue={bio} placeholder="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."></textarea>
+                  <textarea rows="6" name="bio" id="bio" defaultValue={bio} placeholder="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat." minLength="30" maxLength="500" ></textarea>
                 </article>
 
                 <article className="card">
                   <h3 className="title">Skills</h3>
-                  <textarea rows="3" name="skills" id="skills" defaultValue={skills.join(', ')} placeholder="React, Gatsby, Node, Express, PostgreSQL, MongoDB"></textarea>
+                  <textarea rows="3" name="skills" id="skills" maxLength="255" defaultValue={skills.join(', ')} placeholder="React, Gatsby, Node, Express, PostgreSQL, MongoDB"></textarea>
                 </article>
               </div>
             </div>
