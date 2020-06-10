@@ -3,6 +3,7 @@ import { Route, Switch } from 'react-router-dom';
 
 import PrivateRoute from './components/Utils/PrivateRoute';
 import PublicOnlyRoute from './components/Utils/PublicOnlyRoute';
+import PageNotFound from './components/Utils/PageNotFound/PageNotFound';
 import LandingPage from './components/LandingPage/LandingPage';
 import Nav from './components/Nav/Nav';
 import Footer from './components/Footer/Footer';
@@ -16,7 +17,6 @@ import ChatMessages from './components/ChatMessages/ChatMessages';
 import Account from './components/Account/Account';
 import ProjectDash from './components/ProjectDash/ProjectDash';
 import GlobalErrorBoundary from './components/ErrorBoundaries/GlobalErrorBoundary';
-import PageNotFound from './components/Utils/PageNoteFound/PageNotFound';
 
 import UserContext from './contexts/UserContext';
 import TokenService from './services/token-service';
@@ -34,6 +34,7 @@ export default class App extends Component {
       date_created: '',
       isAuth: false
     },
+    isLoading: false,
     error: null
   };
 
@@ -44,17 +45,25 @@ export default class App extends Component {
   handleAuth = () => {
     if (TokenService.hasAuthToken()) {
       AuthApiService.getUserProfile()
-        .then(user => this.setState({ user: { ...user, isAuth: true } }))
+        .then(user => {
+          this.setState({ user: { ...user, isAuth: true } })
+        })
         .catch(res => {
-          // TODO: some kind of notification that they were logged out due to an error
+          this.setState({ error: res.error || 'Something went wrong. Please try again later', user: { isAuth: false } }, () => {
+            throw new Error(this.state.error);
+          });
 
-          TokenService.clearAuthToken();
-          this.setState({ error: res.error || res.message, user: { isAuth: false } })
         });
     } else {
       this.setState({ user: { isAuth: false } });
     }
   };
+
+  handleSetLoading = (loadingState = false) => {
+    this.setState({
+      isLoading: loadingState
+    });
+  }
 
   handleLogOut = () => {
     TokenService.clearAuthToken();
@@ -65,13 +74,21 @@ export default class App extends Component {
     this.setState({ user: { ...this.state.user, ...updatedFields } });
   };
 
+  handleSetNotificaions = notificationSettings => {
+    console.log(notificationSettings);
+    this.setState({ user: { ...this.state.user, notifications: notificationSettings } });
+  }
+
   render() {
-    const { user } = this.state;
+    const { user, isLoading } = this.state;
     const contextValues = {
       user,
       onAuth: this.handleAuth,
       onLogOut: this.handleLogOut,
-      onProfileUpdate: this.handleUserUpdate
+      onProfileUpdate: this.handleUserUpdate,
+      setNotifications: this.handleSetNotificaions,
+      startLoading: () => this.handleSetLoading(true),
+      stopLoading: () => this.handleSetLoading(false)
     };
 
     return (
@@ -80,19 +97,20 @@ export default class App extends Component {
         <GlobalErrorBoundary>
           <Switch>
             <PublicOnlyRoute exact path="/" component={LandingPage} />
-            <PublicOnlyRoute path="/signup" component={Signup} />
-            <PublicOnlyRoute path="/login" component={Login} />
-            <PrivateRoute path="/account" component={Account} />
-            <PrivateRoute path="/feed" component={FeedPage} />
+            <PublicOnlyRoute exact path="/signup" component={Signup} />
+            <PublicOnlyRoute exact path="/login" component={Login} />
+            <PrivateRoute exact path="/account" component={Account} />
+            <PrivateRoute exact path="/feed" component={FeedPage} />
             <PrivateRoute exact path="/projects" component={ProjectsPage} />
-            <PrivateRoute path="/projects/:project_handle" component={ProjectDash} />
-            <PrivateRoute path="/users/:username" component={UserProfile} />
+            <PrivateRoute exact path="/projects/:project_handle" component={ProjectDash} />
+            <PrivateRoute exact path="/users/:username" component={UserProfile} />
             <PrivateRoute exact path="/chats" component={Chat} />
             <PrivateRoute path="/chats/messages" component={ChatMessages} />
-            <Route path="/" component={PageNotFound} />
+            <Route path="*" component={PageNotFound} />
           </Switch>
         </GlobalErrorBoundary>
         <Route path="*" component={Footer} />
+        <div className={`loader ${isLoading ? 'active' : ''}`}></div>
       </UserContext.Provider>
     );
   }

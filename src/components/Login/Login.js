@@ -11,7 +11,7 @@ import './Login.css';
 class Login extends React.Component {
   static defaultProps = {
     history: {
-      push: () => { }
+      goBack: () => { }
     }
   };
 
@@ -23,6 +23,7 @@ class Login extends React.Component {
     e.preventDefault();
     const { user_name, password } = e.target;
     this.setState({ error: null });
+    this.context.startLoading();
     ApiAuthService.postLogin({
       username: user_name.value,
       password: password.value
@@ -32,10 +33,17 @@ class Login extends React.Component {
         password.value = '';
         TokenService.saveAuthToken(user.authToken);
         this.context.onAuth();
-        this.props.history.push('/feed');
+        this.context.stopLoading();
+        let lastLocation = this.props.history.location.state.from.pathname;
+        if (lastLocation) {
+          this.props.history.push(lastLocation)
+        } else {
+          this.props.history.goBack();
+        }
       })
       .catch(res => {
-        this.setState({ error: res.error || res.message });
+        this.setState({ error: res.error || 'Something went wrong. Please try again later' });
+        this.context.stopLoading();
       });
   };
 
@@ -55,13 +63,13 @@ class Login extends React.Component {
           <div className="input-group">
             <div className="input">
               <label htmlFor="username">Username</label>
-              <input type="text" id="username" placeholder="johndoe" name="user_name" required />
+              <input type="text" id="username" placeholder="johndoe" name="user_name" maxLength="30" required />
             </div>
           </div>
           <div className="input-group">
             <div className="input">
               <label htmlFor="pwd">Password</label>
-              <input type="password" id="pwd" name="password" required />
+              <input type="password" id="pwd" name="password" maxLength="72" required />
             </div>
           </div>
 
@@ -78,7 +86,7 @@ class Login extends React.Component {
 
 Login.propTypes = {
   history: PropTypes.shape({
-    push: PropTypes.func
+    goBack: PropTypes.func
   })
 };
 export default Login;

@@ -71,6 +71,16 @@ svg {
   .column-1-2 {
     width: calc((100% - 2rem) / 2);
   }
+
+  .column-1-3 {
+    width: calc(100% / 3);
+    margin-right: 0;
+  }
+
+  .column-2-3 {
+    width: calc(2 * (100% / 3));
+    margin-right: 0;
+  }
 }
 
 /* colors */
@@ -114,6 +124,7 @@ form textarea {
   background: var(--colorDarkBG);
   border: none;
   border-bottom: 1px solid transparent;
+  border-radius: 0;
   outline: none;
   resize: none;
 }
@@ -174,7 +185,7 @@ form label.check span::before {
 }
 
 form label.check input:focus + span::before {
-  outline: 2px solid var(--colorMidFG);
+  outline: 2px solid var(--colorFG);
 }
 
 form label.check input:checked + span::before {
@@ -199,10 +210,15 @@ form .subtitle {
   color: var(--colorMidFG);
 }
 
+.error {
+  color: var(--colorError);
+  margin: 0.5rem 0;
+}
+
 form .error {
   font-size: 1rem;
   margin-bottom: 1rem;
-  color: var(--colorError);
+  word-break: break-all;
 }
 
 form .input-group {
@@ -277,8 +293,21 @@ form hr {
 }
 
 .page header h2 {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   font-size: 2.3rem;
   flex: 1;
+}
+
+.page header form {
+  width: 12rem;
+  max-width: 30vw;
+}
+
+.page header select {
+  margin-bottom: 0;
+  background: var(--colorBG);
 }
 
 .page .page-content {
@@ -329,6 +358,8 @@ html {
   font-weight: 400;
   font-style: normal;
   font-size: 12px;
+  background: var(--colorBG);
+  color: var(--colorFG);
 }
 
 @media screen and (min-width: 360px) {
@@ -344,8 +375,6 @@ html {
 }
 
 body {
-  background: var(--colorBG);
-  color: var(--colorFG);
   overflow-y: scroll;
 }
 
@@ -448,6 +477,14 @@ a[href*='//']::after
   }
 }
 
+.centered {
+  text-align: center;
+}
+
+.centered .btn:hover {
+  color: var(--colorError);
+}
+
 /* card styles */
 .card {
   background: var(--colorLightBG);
@@ -540,4 +577,65 @@ a[href*='//']::after
   width: 0;
   opacity: 0;
   pointer-events: none;
+}
+
+/* 404 */
+.fourohfour {
+  text-align: center;
+  font-size: 3vw;
+}
+
+.fourohfour h1 {
+  font-size: 8em;
+}
+
+.fourohfour h2 {
+  font-size: 2em;
+}
+
+.fourohfour p {
+  max-width: 70vw;
+  margin: 2rem auto 4rem;
+  line-height: 1.3;
+  color: var(--colorMidFG);
+}
+
+/* loader styles */
+.loader {
+  position: fixed;
+  background: #00000044;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+
+.loader::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -30vw;
+  width: 30vw;
+  height: 0.5rem;
+  background: var(--colorAccent);
+  animation: slide 2s ease infinite alternate;
+  opacity: 0.8;
+}
+
+.loader.active {
+  pointer-events: all;
+  opacity: 1;
+}
+
+@keyframes slide {
+  0% {
+    transform: none;
+  }
+  100% {
+    transform: translateX(130vw);
+  }
 }

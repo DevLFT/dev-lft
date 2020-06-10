@@ -44,7 +44,7 @@ class OpenVacancies extends Component {
       })
       .catch(res => {
         this.setState({
-          error: res.error || res.message
+          error: res.error || 'Something went wrong. Please try again later'
         });
       });
   };
@@ -64,7 +64,7 @@ class OpenVacancies extends Component {
         });
       })
       .catch(res => {
-        this.setState({ error: res.error || res.message });
+        this.setState({ error: res.error || 'Something went wrong. Please try again later' });
       });
   };
 
@@ -124,7 +124,7 @@ class OpenVacancies extends Component {
 
   render() {
     const { userRole } = this.props;
-    const { addingVacancy } = this.state;
+    const { addingVacancy, error } = this.state;
     return (
       <article className="card">
         <header className="title">
@@ -143,6 +143,7 @@ class OpenVacancies extends Component {
 
         {addingVacancy
           ? <VacancyModal
+            error={error}
             onSubmitVacancy={this.handleSubmitVacancy}
             onCloseVacancyModal={this.onCancelVacancy}
           />

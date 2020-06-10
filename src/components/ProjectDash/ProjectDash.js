@@ -9,6 +9,7 @@ import Vacancies from './Vacancies';
 import OpenVacancies from './OpenVacancies';
 import Requests from './Requests';
 import Button from '../Button/Button';
+import UserContext from '../../contexts/UserContext';
 import './ProjectDash.css';
 
 // images
@@ -20,6 +21,8 @@ class ProjectDash extends Component {
       push: () => { }
     }
   };
+
+  static contextType = UserContext;
 
   state = {
     project: {},
@@ -34,6 +37,7 @@ class ProjectDash extends Component {
 
   async getData() {
     const project_handle = this.props.match.params.project_handle;
+    this.context.startLoading();
 
     try {
       const project = await ProjectDashService.getProject(project_handle);
@@ -46,10 +50,10 @@ class ProjectDash extends Component {
         const requests = await ProjectDashService.getRequests(project.id);
         this.setState({ requests });
       }
-
     } catch (res) {
-      this.setState({ error: res.error || res.message });
+      this.setState({ error: res.error || 'Something went wrong. Please try again later' });
     }
+    this.context.stopLoading();
   }
 
   // Here be props, we must call back
@@ -80,11 +84,11 @@ class ProjectDash extends Component {
         this.props.history.push('/projects');
       })
       .catch(res => {
-        this.setState({ error: res.error || res.message });
+        this.setState({ error: res.error || 'Something went wrong. Please try again later' });
       });
   };
 
-  handleLeavePosition = (vacancy_id) => {
+  handleLeavePosition = vacancy_id => {
     if (
       prompt(
         'Are you sure you want to leave this position? Type "leave" to confirm'
@@ -96,13 +100,13 @@ class ProjectDash extends Component {
     // set user_id to null to update server
     let user_id = null;
     ProjectDashService.patchVacancy(vacancy_id, user_id)
-      .then(() => this.getData)
+      .then(() => { this.getData() })
       .catch(res => {
-        this.setState({ error: res.error || res.message });
+        this.setState({ error: res.error || 'Something went wrong. Please try again later' });
       });
   };
 
-  handleApprove = (request_id) => {
+  handleApprove = request_id => {
     let status = 'approved';
     let project_id = this.state.project.id;
     ProjectDashService.patchRequest(status, request_id)
@@ -121,11 +125,11 @@ class ProjectDash extends Component {
         });
       })
       .catch(res => {
-        this.setState({ error: res.error || res.message });
+        this.setState({ error: res.error || 'Something went wrong. Please try again later' });
       });
   };
 
-  handleDecline = (request_id) => {
+  handleDecline = request_id => {
     let status = 'denied';
     let project_id = this.state.project.id;
 
@@ -138,21 +142,21 @@ class ProjectDash extends Component {
         });
       })
       .catch(res => {
-        this.setState({ error: res.error || res.message });
+        this.setState({ error: res.error || 'Something went wrong. Please try again later' });
       });
   };
 
   dismissErrorMsg = () => {
     this.setState({
       error: null
-    })
-  }
+    });
+  };
 
   render() {
     let {
       project,
       project: { userRole },
-      error,
+      error
     } = this.state;
     if (!project) {
       return <p>Could not find this project</p>;
@@ -166,48 +170,40 @@ class ProjectDash extends Component {
         <header>
           <div className="wrapper">
             <h2>{project.name}</h2>
-            {userRole === 'owner'
-              ? <Button
-                onClick={this.handleDeleteProject} className="clear"
-                title="Delete project"
-              >
-                <CloseIcon />
-              </Button>
-              : ''}
           </div>
         </header>
 
         <div className="page-content">
           <div className="wrapper">
-            {error
-              ? (
-                <div role="alert" className="info card error">
-                  <p>{error}</p>
-                  <Button className="clear" onClick={this.dismissErrorMsg}><CloseIcon /></Button>
-                </div>
-              )
-              : ''}
+            {error ? (
+              <div role="alert" className="info card error">
+                <p>{error}</p>
+                <Button className="clear" onClick={this.dismissErrorMsg}>
+                  <CloseIcon />
+                </Button>
+              </div>
+            ) : (
+                ''
+              )}
 
-            {userRole === 'member' || userRole === 'owner'
-              ? <Posts project_id={project.id} />
-              : ''}
+            {userRole === 'member' || userRole === 'owner' ? (
+              <Posts project_id={project.id} />
+            ) : (
+                ''
+              )}
 
             <div className="grid">
               <div className="column column-1-2">
                 {userRole === 'owner'
-                  ? (
-                    <Requests
-                      requests={this.state.requests}
-                      handleDecline={this.handleDecline}
-                      handleApprove={this.handleApprove}
-                      project_id={project.id}
-                    />
-                  ) : ''}
+                  ? <Requests
+                    requests={this.state.requests}
+                    handleDecline={this.handleDecline}
+                    handleApprove={this.handleApprove}
+                    project_id={project.id}
+                  />
+                  : ''}
 
-                <Info
-                  description={project.description}
-                  tags={project.tags}
-                />
+                <Info project={project} />
               </div>
 
               <div className="column column-1-2">
@@ -240,9 +236,21 @@ class ProjectDash extends Component {
               project_id={project.id}
               userRole={userRole}
             />
+
+            {userRole === 'owner'
+              ? (
+                <div className="centered">
+                  <Button
+                    onClick={this.handleDeleteProject}
+                    className="clear"
+                  >
+                    Delete Project
+                  </Button>
+                </div>
+              )
+              : ''}
           </div>
         </div>
-
       </section>
     );
   }

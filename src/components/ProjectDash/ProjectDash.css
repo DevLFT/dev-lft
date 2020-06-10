@@ -1,33 +1,47 @@
-.project-dash .project-info {
+.project-dash .project-info > p {
   font-size: 1.2rem;
+  margin-bottom: 2rem;
+  font-weight: 500;
 }
 
-.project-dash .project-info p {
-  margin-bottom: 3rem;
+.project-dash .project-info .user {
+  margin-bottom: 2rem;
+}
+
+.project-dash .project-info .user p {
+  margin: 0.2rem 0 0;
 }
 
 .project-dash .column {
   margin-bottom: 0;
 }
 
-.project-dash .user {
+/* global */
+.user {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 0.6rem;
 }
 
-.project-dash .user .content {
+.user .content {
   margin: 0 0.6rem;
   flex: 1;
 }
 
-.project-dash .user p {
+.user .content h4 {
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.user p {
   color: var(--colorMidFG);
   font-size: 0.9em;
 }
 
-.project-dash .user .btn-clear {
+.user .btn-clear {
   padding: 0;
   background: none;
   height: 1.5rem;
@@ -38,9 +52,10 @@
   margin-left: 0.8rem;
 }
 
-.project-dash .user .btn-clear:hover {
+.user .btn-clear:hover {
   color: var(--colorAccent);
 }
+/* end global */
 
 .project-dash .project,
 .project-dash .open-position {
@@ -90,6 +105,11 @@
   min-height: 10rem;
   max-height: 32rem;
   overflow-y: auto;
+}
+
+.project-dash .chats .author {
+  align-self: flex-start;
+  background: var(--colorMidBG);
 }
 
 .project-dash .modal {

@@ -32,7 +32,7 @@ class Vacancies extends Component {
         });
       })
       .catch(res => {
-        this.setState({ error: res.error || res.message });
+        this.setState({ error: res.error || 'Something went wrong. Please try again later' });
       });
   };
 
@@ -52,7 +52,7 @@ class Vacancies extends Component {
         this.props.setVacancies(filtered);
       })
       .catch(res => {
-        this.setState({ error: res.error || res.message });
+        this.setState({ error: res.error || 'Something went wrong. Please try again later' });
       });
   };
 
@@ -117,6 +117,9 @@ class Vacancies extends Component {
               </li>
             );
           })}
+          {!vacancies.length
+            ? <li className="project">No team members, yet!</li>
+            : ''}
         </ul>
       )
       : <p className="project">No vacancies at this time</p>);
