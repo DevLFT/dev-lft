@@ -34,7 +34,7 @@ export default class FeedPage extends Component {
 
     projects.forEach(project => {
       project.tags.map(tag => {
-        let tags = tag;
+        let tags = tag.toUpperCase();
         projectTags[tags] = true;
       });
     });
@@ -54,9 +54,11 @@ export default class FeedPage extends Component {
 
     if (activeFilter !== '') {
       let filteredProjects = vacantProjects.filter(project => {
-        return project.tags.includes(activeFilter);
+        return project.tags
+          .map(tag => tag.toUpperCase())
+          .includes(activeFilter);
       });
-      
+
       vacantProjects = filteredProjects;
     }
 
@@ -69,31 +71,32 @@ export default class FeedPage extends Component {
         <header>
           <div className="wrapper">
             <h2>Latest Projects</h2>
+
+            <form className="feed-options">
+              <div className="input-group">
+                <div className="input">
+                  <label className="hidden" htmlFor="filter">
+                    Filter By Skill:
+                  </label>
+                  <select
+                    id="filter"
+                    name="filter"
+                    disabled={!vacantProjects.length}
+                    value={activeFilter}
+                    onChange={this.setActiveFilter}
+                  >
+                    <option value="">All</option>
+                    {filters.map((filter, i) => (
+                      <option key={i} value={filter}>
+                        {filter}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </form>
           </div>
         </header>
-        <form className="feed-options">
-          <div className="input-group">
-            <div className="input">
-              <label className="hidden" htmlFor="filter">
-                Filter By Skill:
-              </label>
-              <select
-                id="filter"
-                name="filter"
-                disabled={!vacantProjects.length}
-                value={activeFilter}
-                onChange={this.setActiveFilter}
-              >
-                <option value="">All</option>
-                {filters.map((filter, i) => (
-                  <option key={i} value={filter}>
-                    {filter}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </form>
         <div className="page-content">
           <div className="wrapper">
             {vacantProjects.length !== 0 ? (
