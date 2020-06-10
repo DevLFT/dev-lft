@@ -48,7 +48,14 @@ export default class ProjectItem extends Component {
 
   render() {
     const {
-      project: { handle, name, description, tags = [], date_created, openVacancies = 0 }
+      project: {
+        handle,
+        name,
+        description,
+        tags = [],
+        date_created,
+        openVacancies = 0
+      }
     } = this.props;
     return (
       <article className="project card">
