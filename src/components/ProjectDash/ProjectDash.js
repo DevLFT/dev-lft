@@ -17,7 +17,7 @@ import { CloseIcon } from '../../images';
 class ProjectDash extends Component {
   static defaultProps = {
     history: {
-      push: () => { }
+      push: () => {}
     }
   };
 
@@ -46,7 +46,6 @@ class ProjectDash extends Component {
         const requests = await ProjectDashService.getRequests(project.id);
         this.setState({ requests });
       }
-
     } catch (res) {
       this.setState({ error: res.error || res.message });
     }
@@ -84,7 +83,7 @@ class ProjectDash extends Component {
       });
   };
 
-  handleLeavePosition = (vacancy_id) => {
+  handleLeavePosition = vacancy_id => {
     if (
       prompt(
         'Are you sure you want to leave this position? Type "leave" to confirm'
@@ -102,7 +101,7 @@ class ProjectDash extends Component {
       });
   };
 
-  handleApprove = (request_id) => {
+  handleApprove = request_id => {
     let status = 'approved';
     let project_id = this.state.project.id;
     ProjectDashService.patchRequest(status, request_id)
@@ -125,7 +124,7 @@ class ProjectDash extends Component {
       });
   };
 
-  handleDecline = (request_id) => {
+  handleDecline = request_id => {
     let status = 'denied';
     let project_id = this.state.project.id;
 
@@ -145,14 +144,14 @@ class ProjectDash extends Component {
   dismissErrorMsg = () => {
     this.setState({
       error: null
-    })
-  }
+    });
+  };
 
   render() {
     let {
       project,
       project: { userRole },
-      error,
+      error
     } = this.state;
     if (!project) {
       return <p>Could not find this project</p>;
@@ -166,48 +165,53 @@ class ProjectDash extends Component {
         <header>
           <div className="wrapper">
             <h2>{project.name}</h2>
-            {userRole === 'owner'
-              ? <Button
-                onClick={this.handleDeleteProject} className="clear"
+            {userRole === 'owner' ? (
+              <Button
+                onClick={this.handleDeleteProject}
+                className="clear"
                 title="Delete project"
               >
                 <CloseIcon />
               </Button>
-              : ''}
+            ) : (
+              ''
+            )}
           </div>
         </header>
 
         <div className="page-content">
           <div className="wrapper">
-            {error
-              ? (
-                <div role="alert" className="info card error">
-                  <p>{error}</p>
-                  <Button className="clear" onClick={this.dismissErrorMsg}><CloseIcon /></Button>
-                </div>
-              )
-              : ''}
+            {error ? (
+              <div role="alert" className="info card error">
+                <p>{error}</p>
+                <Button className="clear" onClick={this.dismissErrorMsg}>
+                  <CloseIcon />
+                </Button>
+              </div>
+            ) : (
+              ''
+            )}
 
-            {userRole === 'member' || userRole === 'owner'
-              ? <Posts project_id={project.id} />
-              : ''}
+            {userRole === 'member' || userRole === 'owner' ? (
+              <Posts project_id={project.id} />
+            ) : (
+              ''
+            )}
 
             <div className="grid">
               <div className="column column-1-2">
-                {userRole === 'owner'
-                  ? (
-                    <Requests
-                      requests={this.state.requests}
-                      handleDecline={this.handleDecline}
-                      handleApprove={this.handleApprove}
-                      project_id={project.id}
-                    />
-                  ) : ''}
+                {userRole === 'owner' ? (
+                  <Requests
+                    requests={this.state.requests}
+                    handleDecline={this.handleDecline}
+                    handleApprove={this.handleApprove}
+                    project_id={project.id}
+                  />
+                ) : (
+                  ''
+                )}
 
-                <Info
-                  description={project.description}
-                  tags={project.tags}
-                />
+                <Info project={project} />
               </div>
 
               <div className="column column-1-2">
@@ -242,7 +246,6 @@ class ProjectDash extends Component {
             />
           </div>
         </div>
-
       </section>
     );
   }
