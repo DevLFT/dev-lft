@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Avatar from '../Avatar/Avatar';
 import {
   differenceInDays,
@@ -69,18 +70,25 @@ class Info extends React.Component {
     return (
       <article className="card project-info">
         <h3 className="title">Project Info</h3>
-        <p className="user">
-          Created by{' '}
-          {project_creator
-            ? `${project_creator.first_name} ${project_creator.last_name}`
-            : 'N/A'}
+        <p className="project">{description}</p>
+        <div className="user">
           <Avatar
             first_name={project_creator.first_name}
             last_name={project_creator.last_name}
           />
-        </p>
-        <p>Created on: {this.formatProjectDate(date_created)}</p>
-        <p>{description}</p>
+          <div className="content">
+            <h4>
+              <Link to={`/users/${project_creator.username}`}>
+                {project_creator
+                  ? `${project_creator.first_name} ${
+                      project_creator.last_name && project_creator.last_name[0]
+                    }`
+                  : 'DevLFT User'}
+              </Link>
+            </h4>
+            <span>Created {this.formatProjectDate(date_created)}</span>
+          </div>
+        </div>
         <ul className="tags">{this.renderTags(tags)}</ul>
       </article>
     );
