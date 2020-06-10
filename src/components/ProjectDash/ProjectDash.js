@@ -47,7 +47,7 @@ class ProjectDash extends Component {
         this.setState({ requests });
       }
     } catch (res) {
-      this.setState({ error: res.error || res.message });
+      this.setState({ error: res.error || 'Something went wrong. Please try again later' });
     }
   }
 
@@ -79,7 +79,7 @@ class ProjectDash extends Component {
         this.props.history.push('/projects');
       })
       .catch(res => {
-        this.setState({ error: res.error || res.message });
+        this.setState({ error: res.error || 'Something went wrong. Please try again later' });
       });
   };
 
@@ -97,7 +97,7 @@ class ProjectDash extends Component {
     ProjectDashService.patchVacancy(vacancy_id, user_id)
       .then(() => this.getData)
       .catch(res => {
-        this.setState({ error: res.error || res.message });
+        this.setState({ error: res.error || 'Something went wrong. Please try again later' });
       });
   };
 
@@ -120,7 +120,7 @@ class ProjectDash extends Component {
         });
       })
       .catch(res => {
-        this.setState({ error: res.error || res.message });
+        this.setState({ error: res.error || 'Something went wrong. Please try again later' });
       });
   };
 
@@ -137,7 +137,7 @@ class ProjectDash extends Component {
         });
       })
       .catch(res => {
-        this.setState({ error: res.error || res.message });
+        this.setState({ error: res.error || 'Something went wrong. Please try again later' });
       });
   };
 

@@ -44,7 +44,7 @@ class Posts extends Component {
         this.postList.current.scrollTop = this.postList.current.scrollHeight;
       })
       .catch(res => {
-        this.setState({ error: res.error || res.message });
+        this.setState({ error: res.error || 'Something went wrong. Please try again later' });
       });
   }
 
@@ -55,7 +55,7 @@ class Posts extends Component {
     ProjectDashService.patchPost(post_id, message)
       .then(this.getPosts)
       .catch(res => {
-        this.setState({ error: res.error || res.message });
+        this.setState({ error: res.error || 'Something went wrong. Please try again later' });
       });
   };
 
@@ -68,7 +68,7 @@ class Posts extends Component {
     ProjectDashService.postPost(project_id, message)
       .then(this.getPosts)
       .catch(res => {
-        this.setState({ error: res.error || res.message });
+        this.setState({ error: res.error || 'Something went wrong. Please try again later' });
       });
   };
 
@@ -103,12 +103,13 @@ class Posts extends Component {
     }
 
     let allPosts = [...posts].reverse().map(post => {
+      const isAuthor = post.username === username;
       return (
-        <li key={post.id} className="message">
+        <li key={post.id} className={`message ${isAuthor ? 'author' : ''}`}>
           <header className="user-info">
             <Avatar first_name={post.first_name} last_name={post.last_name} />
             <h4 className="h5">
-              {post.username === username
+              {isAuthor
                 ? 'You'
                 : <Link to={`/users/${post.username}`}>{post.first_name} {post.last_name}</Link>}
             </h4>
@@ -135,14 +136,14 @@ class Posts extends Component {
                 onSubmit={this.handlePatchPost}
               >
                 <label className="hidden" htmlFor="edit-post">Change to:</label>
-                <input autoFocus type="text" name="edit-post" id="edit-post" defaultValue={post.message} placeholder="Say something" />
+                <input autoFocus type="text" maxLength="280" name="edit-post" id="edit-post" defaultValue={post.message} placeholder="Say something" />
                 <Button type="submit">Update</Button>
                 <Button onClick={this.handleCancelEdit} className="clear">Cancel</Button>
               </form>
             )
             : (
               <p className="body">
-                {post.message}
+                {post.message.substr(0, 279) + (post.message.length > 280 ? '...' : '')}
               </p>
             )}
         </li>
@@ -152,12 +153,17 @@ class Posts extends Component {
   };
 
   render() {
+    const { error } = this.state;
     return (
       <article className="card">
         <div className="team-posts">
           <h3 className="title">Discussion</h3>
-          <ul ref={this.postList} className="chats">{this.renderPosts()}</ul>
+          <ul ref={this.postList} className="chats discussion">{this.renderPosts()}</ul>
         </div>
+
+        {error
+          ? <p role="alert" className="error">{error}</p>
+          : ''}
 
         <form onSubmit={this.handleSubmitPost} ref={this.postForm} autoComplete="off">
           <div className="input-group pinned">
@@ -169,9 +175,11 @@ class Posts extends Component {
                 type="text"
                 placeholder="Say something"
                 required
+                minLength="2"
+                maxLength="280"
               />
             </div>
-            <Button type="submit">Send Message</Button>
+            <Button type="submit">Post</Button>
           </div>
         </form>
 
