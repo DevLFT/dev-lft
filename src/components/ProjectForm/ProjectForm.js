@@ -147,7 +147,7 @@ export default class ProjectForm extends Component {
                 <input
                   id="add"
                   type="text"
-                  name="initvalue"
+                  name="tagvalue"
                   autoComplete="off"
                   placeholder="HTML"
                   maxLength="70"
