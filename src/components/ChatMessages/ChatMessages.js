@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import ChatService from '../../services/chat-service';
-import ProjectDashService from '../ProjectDash/project-dash-service';
+import ProjectDashService from '../../services/project-dash-service';
 import Avatar from '../Avatar/Avatar';
 import UserContext from '../../contexts/UserContext';
 import ChatMessageForm from '../ChatMessageForm/ChatMessageForm';
@@ -41,7 +41,7 @@ class ChatMessages extends Component {
     },
     open: false,
     onClose: () => null
-  }
+  };
 
   static contextType = UserContext;
 
@@ -58,7 +58,9 @@ class ChatMessages extends Component {
   }
 
   setAllMessages = () => {
-    const { chat: { chat_id } } = this.props;
+    const {
+      chat: { chat_id }
+    } = this.props;
     ChatService.getAllChatMessages(chat_id)
       .then(allMessages => {
         this.setState({ ...allMessages });
@@ -71,7 +73,9 @@ class ChatMessages extends Component {
     ProjectDashService.patchRequest(status, request_id)
       .then(this.props.onRequest)
       .catch(res => {
-        this.setState({ error: res.error || 'Something went wrong. Please try again later' });
+        this.setState({
+          error: res.error || 'Something went wrong. Please try again later'
+        });
       });
   };
 
@@ -97,9 +101,13 @@ class ChatMessages extends Component {
 
     return (
       <section className={`chat-view ${open ? 'open' : ''}`}>
-        {error
-          ? <div role="alert" className="card info error">{error}</div>
-          : ''}
+        {error ? (
+          <div role="alert" className="card info error">
+            {error}
+          </div>
+        ) : (
+          ''
+        )}
 
         <header>
           <div className="user">
@@ -111,32 +119,43 @@ class ChatMessages extends Component {
             />
             <div className="content">
               <h4>
-                <Link to={`/users/${recipient_username}`}>{first_name} {last_name[0]}</Link>
+                <Link to={`/users/${recipient_username}`}>
+                  {first_name} {last_name[0]}
+                </Link>
                 <span className="highlight">({project_name})</span>
               </h4>
               <p>
-                {isOwner
-                  ? request_status === 'pending'
-                    ? <>wants to fill your {vacancy_name} position</>
-                    : request_status === 'denied'
-                      ? <>wanted to fill your {vacancy_name} position</>
-                      : vacancy_name
-                  : <>You requested to fill their {vacancy_name} position</>}
+                {isOwner ? (
+                  request_status === 'pending' ? (
+                    <>wants to fill your {vacancy_name} position</>
+                  ) : request_status === 'denied' ? (
+                    <>wanted to fill your {vacancy_name} position</>
+                  ) : (
+                    vacancy_name
+                  )
+                ) : (
+                  <>You requested to fill their {vacancy_name} position</>
+                )}
               </p>
             </div>
-            {isOwner && request_status === 'pending'
-              ? (
-                <>
-                  <Button className="clear" onClick={() => this.handleRequest(request_id, 'approved')}>
-                    <CheckIcon title="Approve this request" />
-                  </Button>
-                  <Button className="clear" onClick={() => this.handleRequest(request_id, 'denied')} >
-                    <CloseIcon title="Deny this request" />
-                  </Button>
-                </>
-              )
-              : ''}
-
+            {isOwner && request_status === 'pending' ? (
+              <>
+                <Button
+                  className="clear"
+                  onClick={() => this.handleRequest(request_id, 'approved')}
+                >
+                  <CheckIcon title="Approve this request" />
+                </Button>
+                <Button
+                  className="clear"
+                  onClick={() => this.handleRequest(request_id, 'denied')}
+                >
+                  <CloseIcon title="Deny this request" />
+                </Button>
+              </>
+            ) : (
+              ''
+            )}
           </div>
         </header>
         <ul className="chats" ref={this.chatList}>
@@ -146,29 +165,36 @@ class ChatMessages extends Component {
               className={`message ${message.isAuthor ? 'author' : ''}`}
             >
               <header>
-                {message.isAuthor
-                  ? (
-                    <>
-                      <Avatar first_name={user.first_name} last_name={user.last_name} />
-                      <h4 className="h5">You</h4>
-                    </>
-                  )
-                  : (
-                    <>
-                      <Avatar first_name={first_name} last_name={last_name} />
-                      <h4 className="h5">{first_name} {last_name}</h4>
-                    </>
-                  )}
-                <span className="date">{ChatService.getFormattedDate(message.date_created)}</span>
+                {message.isAuthor ? (
+                  <>
+                    <Avatar
+                      first_name={user.first_name}
+                      last_name={user.last_name}
+                    />
+                    <h4 className="h5">You</h4>
+                  </>
+                ) : (
+                  <>
+                    <Avatar first_name={first_name} last_name={last_name} />
+                    <h4 className="h5">
+                      {first_name} {last_name}
+                    </h4>
+                  </>
+                )}
+                <span className="date">
+                  {ChatService.getFormattedDate(message.date_created)}
+                </span>
               </header>
               <p className="body">{message.body}</p>
             </li>
           ))}
-          {request_status !== 'pending'
-            ? <li className="info">Request {request_status}.</li>
-            : closed
-              ? <li className="info">This chat has been closed.</li>
-              : ''}
+          {request_status !== 'pending' ? (
+            <li className="info">Request {request_status}.</li>
+          ) : closed ? (
+            <li className="info">This chat has been closed.</li>
+          ) : (
+            ''
+          )}
         </ul>
         <ChatMessageForm
           request_id={request_id}
@@ -176,7 +202,7 @@ class ChatMessages extends Component {
           onNewMessage={this.setAllMessages}
           disabled={request_status !== 'pending' || closed}
         />
-      </section >
+      </section>
     );
   }
 }
